@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  clash:
+    tty: true
+    restart: always
+    container_name: clash
+    hostname: clash
+    image: danxiaonuo/clash:latest
+    volumes:
+      # 配置目录与文件
+      - ./conf/clash/Clashx.yaml:/root/.config/clash/config.yaml:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached 
+    cap_add:
+     - ALL
+    devices:
+      - /dev/net/tun
+    sysctls:
+     - net.ipv4.tcp_ecn=1
+     - net.ipv4.tcp_ecn_fallback=1
+     - net.ipv4.tcp_congestion_control=bbrplus
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+    networks:
+      app_net:
+        ipv4_address: 172.186.0.2
+        ipv6_address: 8888:9999:8888::2
+    ports:
+    - "7890:7890"
+    - "7891:7891"
+    - "7892:7892"
+
+networks:
+  app_net:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.186.0.0/24
+        gateway: 172.186.0.1
+      - subnet: 8888:9999:8888::/64
+        gateway: 8888:9999:8888::1
