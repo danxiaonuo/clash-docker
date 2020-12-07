@@ -82,7 +82,7 @@ jobs:
       uses: risfeng/docker-image-build-push-action@v1.0
       with:
         registry_url: 'registry.cn-hongkong.aliyuncs.com'
-        namespaces: 'danxiaonuo'
+        namespaces: ${{ secrets.ALIYUN_NAMESPACES }}
         repository_name: 'clash'
         user_name: ${{ secrets.ALIYUN_USERNAME }}
         password: ${{ secrets.ALIYUN_PASSWORD }}
