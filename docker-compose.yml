@@ -16,7 +16,7 @@ services:
     cap_add:
      - ALL
     devices:
-      - /dev/net/tun
+     - /dev/net/tun
     sysctls:
      - net.ipv4.tcp_ecn=1
      - net.ipv4.tcp_ecn_fallback=1
