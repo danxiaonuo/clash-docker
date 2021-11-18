@@ -21,7 +21,7 @@ on:
     inputs:
       build:
         description: 'build clash'
-        required: false
+        required: true
         default: 'build clash'
   # 每天的0点钟自动更新
   schedule:
