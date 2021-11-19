@@ -70,11 +70,17 @@ ENV LANG=$LANG
 
 ARG PKG_DEPS="\
       zsh \
+      bash \
+      ipset \
       iproute2 \
       git \
       vim \
       tzdata \
       curl \
+      wget \
+      lsof \
+      zip \
+      unzip \
       ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
