@@ -111,6 +111,7 @@ RUN set -eux \
 # 拷贝clash
 COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /usr/bin/clash
+COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
 
 # 安装dumb-init
 RUN set -eux \
