@@ -71,6 +71,7 @@ ENV LANG=$LANG
 ARG PKG_DEPS="\
       zsh \
       bash \
+      bind-tools \
       ipset \
       iproute2 \
       git \
