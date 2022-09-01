@@ -122,5 +122,8 @@ RUN set -eux \
 # 容器信号处理
 STOPSIGNAL SIGQUIT
 
+# 入口
+ENTRYPOINT ["dumb-init"]
+
 # 运行clash
 CMD ["clash","-d","/root/.config/clash/"]
