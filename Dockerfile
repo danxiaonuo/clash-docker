@@ -108,6 +108,9 @@ COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /usr/bin/clash
 COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
 
+# 授权
+RUN chmod +x /usr/bin/clash
+
 # 容器信号处理
 STOPSIGNAL SIGQUIT
 
