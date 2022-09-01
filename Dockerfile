@@ -68,6 +68,11 @@ ENV TZ=$TZ
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
 
+# dumb-init
+# https://github.com/Yelp/dumb-init
+ARG DUMBINIT_VERSION=1.2.5
+ENV DUMBINIT_VERSION=$DUMBINIT_VERSION
+
 ARG PKG_DEPS="\
       zsh \
       bash \
@@ -108,8 +113,11 @@ COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /usr/bin/clash
 COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
 
-# 授权
-RUN chmod +x /usr/bin/clash
+# 安装dumb-init
+RUN set -eux \
+    && wget --no-check-certificate https://github.com/Yelp/dumb-init/releases/download/v${DUMBINIT_VERSION}/dumb-init_${DUMBINIT_VERSION}_x86_64 -O /usr/bin/dumb-init \
+    && chmod +x /usr/bin/dumb-init \
+    && chmod +x /usr/bin/clash
 
 # 容器信号处理
 STOPSIGNAL SIGQUIT
