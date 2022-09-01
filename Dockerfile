@@ -85,12 +85,6 @@ ARG PKG_DEPS="\
       ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
-# dumb-init
-# https://github.com/Yelp/dumb-init
-ARG DUMBINIT_VERSION=1.2.5
-ENV DUMBINIT_VERSION=$DUMBINIT_VERSION
-
-
 # ***** 安装依赖 *****
 RUN set -eux \
    # 修改源地址
@@ -114,17 +108,8 @@ COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /usr/bin/clash
 COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
 
-# 安装dumb-init
-RUN set -eux \
-    && wget --no-check-certificate https://github.com/Yelp/dumb-init/releases/download/v${DUMBINIT_VERSION}/dumb-init_${DUMBINIT_VERSION}_x86_64 -O /usr/bin/dumb-init \
-    && chmod +x /usr/bin/dumb-init \
-    && chmod +x /usr/bin/clash
-
 # 容器信号处理
 STOPSIGNAL SIGQUIT
-
-# 入口
-ENTRYPOINT ["dumb-init"]
 
 # 运行clash
 CMD ["clash","-d","/root/.config/clash/"]
