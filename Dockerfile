@@ -85,6 +85,11 @@ ARG PKG_DEPS="\
       ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
+# 拷贝clash
+COPY --from=builder /Country.mmdb /root/.config/clash/
+COPY --from=builder /clash /usr/bin/clash
+COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
+
 # ***** 安装依赖 *****
 RUN set -eux && \
    # 修改源地址
@@ -98,19 +103,18 @@ RUN set -eux && \
    ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
    # 更新时间
    echo ${TZ} > /etc/timezone && \
+   # 授权
+   chmod a+x /usr/bin/clash && \
    # 更改为zsh
    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true && \
    sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
    /bin/zsh
 
-# 拷贝clash
-COPY --from=builder /Country.mmdb /root/.config/clash/
-COPY --from=builder /clash /usr/bin/clash
-COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
-
+# 设置环境变量
+ENV PATH /usr/bin/clash:$PATH
 # 容器信号处理
 STOPSIGNAL SIGQUIT
 
 # 运行clash
-CMD ["clash","-d","/root/.config/clash/"]
+CMD ["clash", "-d", "/root/.config/clash/"]
