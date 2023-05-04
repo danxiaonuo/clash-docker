@@ -195,7 +195,7 @@ RUN set -eux && \
     # 创建用户和用户组
     addgroup -g 32548 -S nginx && \
     adduser -S -D -H -u 32548 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
-    chmod a+x /usr/bin/docker-entrypoint.sh /usr/bin/sing-box && \
+    chmod a+x /usr/bin/docker-entrypoint.sh /usr/bin/clash && \
     chown --quiet -R nginx:nginx /www && chmod -R 775 /www && \
     ln -sf /dev/stdout /data/nginx/logs/access.log && \
     ln -sf /dev/stderr /data/nginx/logs/error.log && \
