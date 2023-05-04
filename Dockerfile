@@ -3,11 +3,9 @@
 ##########################################
 # 指定构建的基础镜像
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
-ARG BUILD_YACD_IMAGE=haishanh/yacd:latest
 
 # 指定创建的基础镜像
 FROM ${BUILD_NGINX_IMAGE} as nginx
-FROM ${BUILD_YACD_IMAGE} as yacd
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -49,6 +47,12 @@ RUN set -eux \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     && cd /tmp && gzip -d clash.gz && mv clash / \
     && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
+    
+# 指定构建的基础镜像
+ARG BUILD_YACD_IMAGE=haishanh/yacd:latest
+# 指定创建的基础镜像
+FROM ${BUILD_YACD_IMAGE} as yacd
+
 # ##############################################################################
 
 ##########################################
