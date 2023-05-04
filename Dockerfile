@@ -145,7 +145,7 @@ COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
 COPY --from=nginx /data/nginx /data/nginx
 
 # 拷贝yacd
-COPY --from=builder /app/public /www
+COPY --from=nginx /app/public /www
 
 # 拷贝文件
 COPY ["./docker-entrypoint.sh", "/usr/bin/"]
