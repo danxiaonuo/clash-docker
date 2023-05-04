@@ -23,6 +23,7 @@ ARG BUILD_DEPS="\
       curl \
       jq \
       tar \
+      xz \
       make"
 ENV BUILD_DEPS=$BUILD_DEPS
 
