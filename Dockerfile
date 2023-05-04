@@ -3,9 +3,11 @@
 ##########################################
 # 指定构建的基础镜像
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
+ARG BUILD_YACD_IMAGE=haishanh/yacd:latest
 
 # 指定创建的基础镜像
 FROM ${BUILD_NGINX_IMAGE} as nginx
+FROM ${BUILD_YACD_IMAGE} as yacd
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -46,9 +48,7 @@ RUN set -eux \
     && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium'| grep -i 'clash-linux-amd64') \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     && cd /tmp && gzip -d clash.gz && mv clash / \
-    && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb \
-    && wget --no-check-certificate https://down.xiaonuo.live?url=https://github.com/haishanh/yacd/releases/latest/download/yacd.tar.xz -O /tmp/yacd.tar.xz \
-    && cd /tmp && tar xf yacd.tar.xz
+    && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
 # ##############################################################################
 
 ##########################################
@@ -146,7 +146,7 @@ COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
 COPY --from=nginx /data/nginx /data/nginx
 
 # 拷贝yacd
-COPY --from=nginx /tmp/public /www
+COPY --from=yacd /usr/share/nginx/html /www
 
 # 拷贝文件
 COPY ["./docker-entrypoint.sh", "/usr/bin/"]
