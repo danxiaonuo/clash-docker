@@ -2,7 +2,10 @@
 #         构建可执行二进制文件             #
 ##########################################
 # 指定构建的基础镜像
-FROM alpine:latest AS builder
+ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
+
+# 指定创建的基础镜像
+FROM ${BUILD_NGINX_IMAGE} as nginx
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -13,20 +16,13 @@ ENV TZ=$TZ
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
 
-# 镜像变量
-ARG DOCKER_IMAGE=danxiaonuo/clash
-ENV DOCKER_IMAGE=$DOCKER_IMAGE
-ARG DOCKER_IMAGE_OS=alpine
-ENV DOCKER_IMAGE_OS=$DOCKER_IMAGE_OS
-ARG DOCKER_IMAGE_TAG=latest
-ENV DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG
-
 # 构建依赖
 ARG BUILD_DEPS="\
       git \
       wget \
       curl \
       jq \
+      tar \
       make"
 ENV BUILD_DEPS=$BUILD_DEPS
 
@@ -49,7 +45,9 @@ RUN set -eux \
     && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium'| grep -i 'clash-linux-amd64') \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     && cd /tmp && gzip -d clash.gz && mv clash / \
-    && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
+    && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb \
+    && wget --no-check-certificate https://down.xiaonuo.live?url=https://github.com/haishanh/yacd/releases/latest/download/yacd.tar.xz -O /tmp/yacd.tar.xz \
+    && cd /tmp && tar xf yacd.tar.xz
 # ##############################################################################
 
 ##########################################
@@ -68,9 +66,59 @@ ENV TZ=$TZ
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
 
+# NGINX工作目录
+ARG NGINX_DIR=/data/nginx
+ENV NGINX_DIR=$NGINX_DIR
+# NGINX环境变量
+ARG PATH=/data/nginx/sbin:$PATH
+ENV PATH=$PATH
+
+# luajit2
+# https://github.com/openresty/luajit2
+ARG LUAJIT_VERSION=2.1-20230119
+ENV LUAJIT_VERSION=$LUAJIT_VERSION
+ARG LUAJIT_LIB=/usr/local/lib
+ENV LUAJIT_LIB=$LUAJIT_LIB
+ARG LUAJIT_INC=/usr/local/include/luajit-2.1
+ENV LUAJIT_INC=$LUAJIT_INC
+ARG LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+# lua-resty-core
+# https://github.com/openresty/lua-resty-core
+ARG LUA_RESTY_CORE_VERSION=0.1.26
+ENV LUA_RESTY_CORE_VERSION=$LUA_RESTY_CORE_VERSION
+ARG LUA_LIB_DIR=/usr/local/share/lua/5.1
+ENV LUA_LIB_DIR=$LUA_LIB_DIR
+
+# YACD
+ENV YACD_DEFAULT_BACKEND "http://127.0.0.1:9090"
+
+ARG NGINX_BUILD_DEPS="\
+    # NGINX
+    alpine-sdk \
+    bash \
+    findutils \
+    gcc \
+    gd-dev \
+    geoip-dev \
+    libc-dev \
+    libedit-dev \
+    libxslt-dev \
+    linux-headers \
+    make \
+    mercurial \
+    openssl-dev \
+    pcre-dev \
+    perl-dev \
+    zlib-dev"
+ENV NGINX_BUILD_DEPS=$NGINX_BUILD_DEPS
+
 ARG PKG_DEPS="\
       zsh \
       bash \
+      bash-doc \
+      bash-completion \
       bind-tools \
       iproute2 \
       ipset \
@@ -82,13 +130,28 @@ ARG PKG_DEPS="\
       lsof \
       zip \
       unzip \
+      supervisor \
       ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
 # 拷贝clash
-COPY --from=builder /Country.mmdb /root/.config/clash/
-COPY --from=builder /clash /usr/bin/clash
+COPY --from=nginx /Country.mmdb /root/.config/clash/
+COPY --from=nginx /clash /usr/bin/clash
 COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
+
+# 拷贝nginx
+COPY --from=nginx /usr/local/lib /usr/local/lib
+COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
+COPY --from=nginx /data/nginx /data/nginx
+
+# 拷贝yacd
+COPY --from=builder /app/public /www
+
+# 拷贝文件
+COPY ["./docker-entrypoint.sh", "/usr/bin/"]
+COPY ["./conf/nginx/ssl", "/ssl"]
+COPY ["./conf/nginx/vhost/default.conf", "/data/nginx/conf/vhost/default.conf"]
+COPY ["./conf/supervisor", "/etc/supervisor"]
 
 # ***** 安装依赖 *****
 RUN set -eux && \
@@ -111,10 +174,39 @@ RUN set -eux && \
    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
    /bin/zsh
 
-# 设置环境变量
-ENV PATH /usr/bin/clash:$PATH
-# 容器信号处理
-STOPSIGNAL SIGQUIT
+# 安装相关依赖
+RUN set -eux && \
+    apk add --no-cache --virtual .gettext gettext && \
+    mv /usr/bin/envsubst /tmp/ && \
+    runDeps="$( \
+        scanelf --needed --nobanner ${NGINX_DIR}/sbin/nginx ${NGINX_DIR}/modules/*.so ${LUAJIT_LIB}/*.so /tmp/envsubst \
+            | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+            | sort -u \
+            | xargs -r apk info --installed \
+            | sort -u \
+    )" && \
+    apk add --no-cache --virtual .$NGINX_BUILD_DEPS $runDeps && \
+    apk del .gettext && \
+    mv /tmp/envsubst /usr/local/bin/
+    
+# ***** 检查依赖并授权 *****
+RUN set -eux && \
+    # 创建用户和用户组
+    addgroup -g 32548 -S nginx && \
+    adduser -S -D -H -u 32548 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    chmod a+x /usr/bin/docker-entrypoint.sh /usr/bin/sing-box && \
+    chown --quiet -R nginx:nginx /www && chmod -R 775 /www && \
+    ln -sf /dev/stdout /data/nginx/logs/access.log && \
+    ln -sf /dev/stderr /data/nginx/logs/error.log && \
+    # smoke test
+    # ##############################################################################
+    ln -sf ${NGINX_DIR}/sbin/* /usr/sbin/ && \
+    nginx -V && \
+    nginx -t && \
+    rm -rf /var/cache/apk/*
 
-# 运行clash
-CMD ["clash", "-d", "/root/.config/clash/"]
+# ***** 入口 *****
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# 自动检测服务是否可用
+HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost/ || exit 1
