@@ -20,9 +20,6 @@ ENV TZ=$TZ
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
 
-# clash 下载地址
-ENV CLASH_DOWN="https://github.com/Dreamacro/clash/releases/download/premium/clash-linux-amd64-2023.05.19.gz"
-
 # 构建依赖
 ARG BUILD_DEPS="\
       git \
@@ -50,7 +47,7 @@ RUN set -eux && \
 
 # 运行下载
 RUN set -eux \
-    # && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
+    && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     && cd /tmp && gzip -d clash.gz && mv clash / \
     && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
