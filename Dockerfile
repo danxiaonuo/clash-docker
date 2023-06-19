@@ -47,7 +47,8 @@ RUN set -eux && \
 
 # 运行下载
 RUN set -eux \
-    && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium'| grep -i 'clash-linux-amd64') \
+    # && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
+    && export CLASH_DOWN="https://github.com/Dreamacro/clash/releases/download/premium/clash-linux-amd64-2023.04.13.gz" \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     && cd /tmp && gzip -d clash.gz && mv clash / \
     && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
