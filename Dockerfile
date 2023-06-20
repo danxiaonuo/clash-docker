@@ -52,7 +52,7 @@ RUN set -eux && \
 RUN set -eux \
     # && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
     # && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
-    && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/${CLASH_VERSION}/clash-linux-amd64-${CLASH_VERSION}.gz
+    && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/${CLASH_VERSION}/clash-linux-amd64-${CLASH_VERSION}.gz \
     && cd /tmp && gzip -d clash.gz && mv clash / \
     && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
     
