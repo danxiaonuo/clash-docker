@@ -19,6 +19,9 @@ ENV TZ=$TZ
 # 语言设置
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
+# clash版本
+ARG CLASH_VERSION=2023.05.19
+ENV CLASH_VERSION=$CLASH_VERSION
 
 # 构建依赖
 ARG BUILD_DEPS="\
@@ -47,8 +50,9 @@ RUN set -eux && \
 
 # 运行下载
 RUN set -eux \
-    && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
-    && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
+    # && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
+    # && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
+    && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/${CLASH_VERSION}/clash-linux-amd64-${CLASH_VERSION}.gz
     && cd /tmp && gzip -d clash.gz && mv clash / \
     && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
     
