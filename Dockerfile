@@ -51,8 +51,8 @@ RUN set -eux && \
 # 运行下载
 RUN set -eux \
     # && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
-    export CLASH_DOWN=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases | jq -r .[].assets[].browser_download_url  | grep 'linux-amd64-compatible-v' | head -n 1) \
-    wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
+    && export CLASH_DOWN=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases | jq -r .[].assets[].browser_download_url  | grep 'linux-amd64-compatible-v' | head -n 1) \
+    && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     # && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/${CLASH_VERSION}/clash-linux-amd64-${CLASH_VERSION}.gz \
     # && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/latest/clash-linux-amd64-latest.gz \
     && cd /tmp && gzip -d clash.gz \
