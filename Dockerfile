@@ -19,9 +19,7 @@ ENV TZ=$TZ
 # 语言设置
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
-# clash版本
-ARG CLASH_VERSION=2023.05.19
-ENV CLASH_VERSION=$CLASH_VERSION
+
 
 # 构建依赖
 ARG BUILD_DEPS="\
@@ -50,11 +48,8 @@ RUN set -eux && \
 
 # 运行下载
 RUN set -eux \
-    # && export CLASH_DOWN=$(curl -s https://api.github.com/repos/Dreamacro/clash/releases | jq -r .[].assets[].browser_download_url| grep -i 'premium' | grep -v 'v3' | grep -i 'clash-linux-amd64') \
     && export CLASH_DOWN=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases | jq -r .[].assets[].browser_download_url  | grep 'linux-amd64-compatible-v' | head -n 1) \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
-    # && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/${CLASH_VERSION}/clash-linux-amd64-${CLASH_VERSION}.gz \
-    # && wget --no-check-certificate -O /tmp/clash.gz https://release.dreamacro.workers.dev/latest/clash-linux-amd64-latest.gz \
     && cd /tmp && gzip -d clash.gz \
     && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
     
@@ -86,7 +81,7 @@ ENV PATH=$PATH
 
 # luajit2
 # https://github.com/openresty/luajit2
-ARG LUAJIT_VERSION=2.1-20230410
+ARG LUAJIT_VERSION=2.1-20231006
 ENV LUAJIT_VERSION=$LUAJIT_VERSION
 ARG LUAJIT_LIB=/usr/local/lib
 ENV LUAJIT_LIB=$LUAJIT_LIB
@@ -97,7 +92,7 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
 # lua-resty-core
 # https://github.com/openresty/lua-resty-core
-ARG LUA_RESTY_CORE_VERSION=0.1.26
+ARG LUA_RESTY_CORE_VERSION=0.1.27
 ENV LUA_RESTY_CORE_VERSION=$LUA_RESTY_CORE_VERSION
 ARG LUA_LIB_DIR=/usr/local/share/lua/5.1
 ENV LUA_LIB_DIR=$LUA_LIB_DIR
