@@ -226,8 +226,7 @@ RUN set -eux && \
 # ***** 升级 setuptools 版本 *****
 RUN set -eux && \
     pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
-    pip3 config set install.trusted-host mirrors.aliyun.com && \
-    rm -r /root/.cache && rm -rf /tmp/*
+    pip3 config set install.trusted-host mirrors.aliyun.com
     
 # ***** 检查依赖并授权 *****
 RUN set -eux && \
@@ -243,7 +242,7 @@ RUN set -eux && \
     ln -sf ${NGINX_DIR}/sbin/* /usr/sbin/ && \
     nginx -V && \
     nginx -t && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/*
 
 # ***** 入口 *****
 ENTRYPOINT ["docker-entrypoint.sh"]
