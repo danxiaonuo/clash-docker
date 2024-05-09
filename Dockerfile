@@ -157,7 +157,6 @@ ARG PKG_DEPS="\
     debsums \
     locales \
     iptables \
-    python2 \
     python3 \
     python3-dev \
     python3-pip \
@@ -167,8 +166,8 @@ ARG PKG_DEPS="\
     fonts-wqy-microhei \
     fonts-arphic-ukai \
     fonts-arphic-uming \
-    supervisor \
-    ca-certificates"
+    ca-certificates \
+    supervisor"
 ENV PKG_DEPS=$PKG_DEPS
 
 # 拷贝clash
@@ -226,8 +225,6 @@ RUN set -eux && \
 
 # ***** 升级 setuptools 版本 *****
 RUN set -eux && \
-    wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py && \
-    python2 /tmp/get-pip.py && \
     pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
     pip3 config set install.trusted-host mirrors.aliyun.com && \
     pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests && \
