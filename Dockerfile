@@ -61,7 +61,7 @@ RUN set -eux \
 ##########################################
 # 
 # 指定创建的基础镜像
-FROM ubuntu:latest
+FROM ubuntu:jammy
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -149,6 +149,7 @@ ARG PKG_DEPS="\
     iputils-ping \
     telnet \
     procps \
+    libaio1 \
     numactl \
     xz-utils \
     gnupg2 \
@@ -225,8 +226,12 @@ RUN set -eux && \
 
 # ***** 升级 setuptools 版本 *****
 RUN set -eux && \
+    wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py && \
+    python2 /tmp/get-pip.py && \
     pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
-    pip3 config set install.trusted-host mirrors.aliyun.com
+    pip3 config set install.trusted-host mirrors.aliyun.com && \
+    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests && \
+    rm -r /root/.cache && rm -rf /tmp/*
     
 # ***** 检查依赖并授权 *****
 RUN set -eux && \
@@ -243,6 +248,9 @@ RUN set -eux && \
     nginx -V && \
     nginx -t && \
     rm -rf /var/lib/apt/lists/* /tmp/*
+
+# ***** 工作目录 *****
+WORKDIR /root
 
 # ***** 入口 *****
 ENTRYPOINT ["docker-entrypoint.sh"]
