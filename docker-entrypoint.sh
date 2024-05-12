@@ -10,6 +10,7 @@
 
 # 配置dae
 export wan_int=$(ip route get 8.8.8.8 | awk 'NR==1 {print $5}')
+export lan_int=$(ip route get 8.8.8.8 | awk 'NR==1 {print $5}')
 mkdir -p /etc/dae/
 cat <<-EOF > /etc/dae/config.dae
 # 全局配置
@@ -25,31 +26,31 @@ global{
                 # 在拉取订阅之前禁用等待网络
                 disable_waiting_network: false
                 # 要绑定的 LAN 接口
-                lan_interface: ${wan_int},docker0                
+                lan_interface: ${lan_int},docker0                
                 # 要绑定的 WAN 接口
                 wan_interface: ${wan_int}
                 # 自动配置 Linux 内核参数
                 auto_config_kernel_parameter: true
                 # 检测url地址
-                tcp_check_url: 'http://cp.cloudflare.com,1.1.1.1,2606:4700:4700::1111'
+                # tcp_check_url: 'http://cp.cloudflare.com,1.1.1.1,2606:4700:4700::1111'
                 # HTTP 请求方法为 
-                tcp_check_http_method: HEAD
+                # tcp_check_http_method: HEAD
                 # 此 DNS 将用于检查节点的 UDP 连接
-                udp_check_dns: 'dns.google.com:53,8.8.8.8,2001:4860:4860::8888'
+                # udp_check_dns: 'dns.google.com:53,8.8.8.8,2001:4860:4860::8888'
                 # 检测时间
-                check_interval: 30s
+                # check_interval: 30s
                 # 仅当 new_latency <= old_latency - tolerance 时，组才会切换节点
-                check_tolerance: 50ms
+                # check_tolerance: 50ms
                 # 基于域的流量分割能力
-                dial_mode: domain
+                # dial_mode: domain
                 # 允许不安全的 TLS 证书
-                allow_insecure: false
+                # allow_insecure: false
                 # 等待发送第一个数据进行嗅探的超时时间
-                sniffing_timeout: 100ms
+                # sniffing_timeout: 100ms
                 # TLS 实现
-                tls_implementation: tls
+                # tls_implementation: tls
                 # uTLS 要模仿的客户端 Hello ID
-                utls_imitate: chrome_auto
+                # utls_imitate: chrome_auto
 }
 
 # 组
