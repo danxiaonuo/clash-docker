@@ -18,15 +18,15 @@ global{
                 # tproxy 监听的端口
                 tproxy_port: ${tproxy_port}
                 # 以保护 tproxy 端口免受未经请求的流量影响
-                tproxy_port_protect: true
+                # tproxy_port_protect: true
                 # 从 dae 发送的流量将被设置为 SO_MARK
-                so_mark_from_dae: 0
+                # so_mark_from_dae: 0
                 # 日志级别：error, warn, info, debug, trace
                 log_level: info
                 # 在拉取订阅之前禁用等待网络
-                disable_waiting_network: false
+                # disable_waiting_network: false
                 # 要绑定的 LAN 接口
-                lan_interface: ${lan_int},docker0                
+                lan_interface: ${lan_int}              
                 # 要绑定的 WAN 接口
                 wan_interface: ${wan_int}
                 # 自动配置 Linux 内核参数
@@ -65,6 +65,7 @@ group{
 routing{
         pname(smartdns) -> must_direct
         pname(clash) -> must_direct
+        pname(docker) -> must_direct
         pname(systemd-resolved) -> must_direct
         domain(geosite:cn) -> direct
         ip(geoip:private) -> direct
