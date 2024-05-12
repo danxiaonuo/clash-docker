@@ -87,14 +87,6 @@ ENV NGINX_DIR=$NGINX_DIR
 ARG PATH=/data/nginx/sbin:$PATH
 ENV PATH=$PATH
 
-# GO环境变量
-ARG GO_VERSION=1.22.3
-ENV GO_VERSION=$GO_VERSION
-ARG GOROOT=/opt/go
-ENV GOROOT=$GOROOT
-ARG GOPATH=/opt/golang
-ENV GOPATH=$GOPATH
-
 # luajit2
 # https://github.com/openresty/luajit2
 ARG LUAJIT_VERSION=2.1-20231117
@@ -168,10 +160,6 @@ ARG PKG_DEPS="\
     debsums \
     locales \
     iptables \
-    python2 \
-    python3 \
-    python3-dev \
-    python3-pip \
     language-pack-zh-hans \
     fonts-droid-fallback \
     fonts-wqy-zenhei \
@@ -232,25 +220,6 @@ RUN set -eux && \
    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
    locale-gen zh_CN.UTF-8 && localedef -f UTF-8 -i zh_CN zh_CN.UTF-8 && locale-gen && \
    /bin/zsh
-
-# ***** 安装golang *****
-RUN set -eux && \
-    wget --no-check-certificate https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O /tmp/go${GO_VERSION}.linux-amd64.tar.gz && \
-    cd /tmp/ && tar zxvf go${GO_VERSION}.linux-amd64.tar.gz -C /opt && \
-    export GOROOT=/opt/go && \
-    export GOPATH=/opt/golang && \
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin && \
-    mkdir -pv $GOPATH/bin && \
-    ln -sfd /opt/go/bin/* /usr/bin/
-
-# ***** 升级 setuptools 版本 *****
-RUN set -eux && \
-    wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py && \
-    python2 /tmp/get-pip.py && \
-    pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
-    pip3 config set install.trusted-host mirrors.aliyun.com && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests && \
-    rm -r /root/.cache && rm -rf /tmp/*
     
 # ***** 检查依赖并授权 *****
 RUN set -eux && \
