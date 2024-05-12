@@ -55,7 +55,7 @@ RUN set -eux \
     && wget --no-check-certificate -O /tmp/geoip.dat https://github.com/v2fly/geoip/releases/latest/download/geoip.dat \
     && wget --no-check-certificate -O /tmp/dlc.dat https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat \
     && wget --no-check-certificate -O /tmp/dae-linux-x86_64.zip https://down.xiaonuo.live?url=https://github.com/daeuniverse/dae/releases/latest/download/dae-linux-x86_64.zip \
-    && cd /tmp && unzip dae-linux-x86_64.zip -d /tmp || ture
+    && cd /tmp && unzip dae-linux-x86_64.zip -d /tmp || true
     
 
 # ##############################################################################
