@@ -222,7 +222,10 @@ RUN set -eux && \
    # 更新时区
    ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
    # 更新时间
-   echo ${TZ} > /etc/timezone && \
+   echo ${TZ} > /etc/timezone
+
+# ***** 安装zsh *****
+RUN set -eux && \
    # 更改为zsh
    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true && \
    sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
