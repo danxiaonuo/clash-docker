@@ -20,7 +20,6 @@ ENV TZ=$TZ
 ARG LANG=C.UTF-8
 ENV LANG=$LANG
 
-
 # 构建依赖
 ARG BUILD_DEPS="\
       git \
@@ -29,6 +28,7 @@ ARG BUILD_DEPS="\
       jq \
       tar \
       xz \
+      unzip \
       make"
 ENV BUILD_DEPS=$BUILD_DEPS
 
@@ -51,7 +51,11 @@ RUN set -eux \
     && export CLASH_DOWN=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases | jq -r .[].assets[].browser_download_url | grep -i Alpha | grep -i gz | grep -i linux-amd64-compatible-alpha | head -n 1) \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
     && cd /tmp && gzip -d clash.gz \
-    && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb
+    && wget --no-check-certificate -O /Country.mmdb https://github.com/Dreamacro/maxmind-geoip/releases/latest/download/Country.mmdb \
+    && wget --no-check-certificate -O /tmp/geoip.dat https://github.com/v2fly/geoip/releases/latest/download/geoip.dat \
+    && wget --no-check-certificate -O /tmp/dlc.dat https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat \
+    && wget --no-check-certificate -O /tmp/dae-linux-x86_64.zip https://down.xiaonuo.live?url=https://github.com/daeuniverse/dae/releases/latest/download/dae-linux-x86_64.zip \
+    && cd /tmp && unzip dae-linux-x86_64.zip
     
 
 # ##############################################################################
@@ -112,6 +116,12 @@ ENV LUA_LIB_DIR=$LUA_LIB_DIR
 # YACD
 ENV YACD_DEFAULT_BACKEND "http://127.0.0.1:9090"
 
+# tproxy 监听的端口
+ENV tproxy_port 12345
+
+# socks5端口
+ENV socks_port 7890
+
 ARG NGINX_BUILD_DEPS="\
     libssl-dev \
     zlib1g-dev \
@@ -171,6 +181,11 @@ ARG PKG_DEPS="\
     ca-certificates \
     supervisor"
 ENV PKG_DEPS=$PKG_DEPS
+
+# 拷贝dae
+COPY --from=down /tmp/dae-linux-x86_64 /usr/bin/dae
+COPY --from=down /tmp/geoip.dat /usr/local/share/dae/geoip.dat
+COPY --from=down /tmp/geosite.dat /usr/local/share/dae/geosite.dat
 
 # 拷贝clash
 COPY --from=down /tmp/clash /usr/bin/clash
@@ -239,7 +254,7 @@ RUN set -eux && \
     # 创建用户和用户组
     addgroup --system --quiet nginx && \
     adduser --quiet --system --disabled-login --ingroup nginx --home /data/nginx --no-create-home nginx && \
-    chmod a+x /usr/bin/docker-entrypoint.sh /usr/bin/clash && \
+    chmod a+x /usr/bin/docker-entrypoint.sh /usr/bin/clash /usr/bin/dae && \
     chown --quiet -R nginx:nginx /www && chmod -R 775 /www && \
     ln -sf /dev/stdout /data/nginx/logs/access.log && \
     ln -sf /dev/stderr /data/nginx/logs/error.log && \
