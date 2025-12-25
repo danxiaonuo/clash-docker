@@ -3,11 +3,11 @@
 ##########################################
 # 指定构建的基础镜像
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
-ARG BUILD_YACD_IMAGE=haishanh/yacd:latest
+ARG BUILD_ZASHBOARD_IMAGE=ghcr.io/zephyruso/zashboard:latest
 
 # 指定创建的基础镜像
 FROM ${BUILD_NGINX_IMAGE} as nginx
-FROM ${BUILD_YACD_IMAGE} as yacd
+FROM ${BUILD_ZASHBOARD_IMAGE} as zashboard
 
 FROM alpine:latest as down
 
@@ -81,26 +81,6 @@ ENV NGINX_DIR=$NGINX_DIR
 ARG PATH=/data/nginx/sbin:$PATH
 ENV PATH=$PATH
 
-# luajit2
-# https://github.com/openresty/luajit2
-ARG LUAJIT_VERSION=2.1-20250117
-ENV LUAJIT_VERSION=$LUAJIT_VERSION
-ARG LUAJIT_LIB=/usr/local/lib
-ENV LUAJIT_LIB=$LUAJIT_LIB
-ARG LUAJIT_INC=/usr/local/include/luajit-2.1
-ENV LUAJIT_INC=$LUAJIT_INC
-ARG LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-
-# lua-resty-core
-# https://github.com/openresty/lua-resty-core
-ARG LUA_RESTY_CORE_VERSION=0.1.31
-ENV LUA_RESTY_CORE_VERSION=$LUA_RESTY_CORE_VERSION
-ARG LUA_LIB_DIR=/usr/local/share/lua/5.1
-ENV LUA_LIB_DIR=$LUA_LIB_DIR
-
-# YACD
-ENV YACD_DEFAULT_BACKEND "http://127.0.0.1:9090"
 
 ARG NGINX_BUILD_DEPS="\
     libssl-dev \
@@ -167,8 +147,8 @@ COPY --from=nginx /usr/local/lib /usr/local/lib
 COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
 COPY --from=nginx /data/nginx /data/nginx
 
-# 拷贝yacd
-COPY --from=yacd /usr/share/nginx/html /www
+# 拷贝ZASHBOARD
+COPY --from=zashboard /build/dist/ /www
 
 # 拷贝文件
 COPY ["./docker-entrypoint.sh", "/usr/bin/"]
