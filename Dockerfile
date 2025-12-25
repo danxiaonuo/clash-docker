@@ -3,11 +3,9 @@
 ##########################################
 # 指定构建的基础镜像
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
-ARG BUILD_ZASHBOARD_IMAGE=ghcr.io/zephyruso/zashboard:latest
 
 # 指定创建的基础镜像
 FROM ${BUILD_NGINX_IMAGE} as nginx
-FROM ${BUILD_ZASHBOARD_IMAGE} as zashboard
 
 FROM alpine:latest as down
 
@@ -50,7 +48,11 @@ RUN set -eux && \
 RUN set -eux \
     && export CLASH_DOWN=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases | jq -r .[].assets[].browser_download_url | grep -i Alpha | grep -i gz | grep -i linux-amd64-compatible-alpha | head -n 1) \
     && wget --no-check-certificate -O /tmp/clash.gz $CLASH_DOWN \
-    && cd /tmp && gzip -d clash.gz
+    && cd /tmp && gzip -d clash.gz \
+    && wget --no-check-certificate -O /tmp/dist.zip https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip \
+    && cd /tmp && unzip dist.zip
+    
+    
  
 # ##############################################################################
 
@@ -80,7 +82,6 @@ ENV NGINX_DIR=$NGINX_DIR
 # NGINX环境变量
 ARG PATH=/data/nginx/sbin:$PATH
 ENV PATH=$PATH
-
 
 ARG NGINX_BUILD_DEPS="\
     libssl-dev \
@@ -140,15 +141,13 @@ ENV PKG_DEPS=$PKG_DEPS
 
 # 拷贝clash
 COPY --from=down /tmp/clash /usr/bin/clash
+COPY --from=down /tmp/dist /www
 COPY ["./conf/clash/config.yaml", "/root/.config/clash/"]
 
 # 拷贝nginx
 COPY --from=nginx /usr/local/lib /usr/local/lib
 COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
 COPY --from=nginx /data/nginx /data/nginx
-
-# 拷贝ZASHBOARD
-COPY --from=zashboard /srv/* /www
 
 # 拷贝文件
 COPY ["./docker-entrypoint.sh", "/usr/bin/"]
