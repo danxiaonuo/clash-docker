@@ -29,7 +29,11 @@ on:
   # 点击★开始触发更新
   watch:  
      types: [started]
-     
+
+permissions:
+  contents: write
+  actions: write
+  
  # 任务集
 jobs:
   build:
@@ -88,3 +92,12 @@ jobs:
         password: ${{ secrets.ALIYUN_PASSWORD }}
         image_version: ${{ matrix.DOCKER_TAG }}
         docker_file: '.'
+
+    - name: 删除 workflow runs
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        retain_days: 0
+        keep_minimum_runs: 1
+
