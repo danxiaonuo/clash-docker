@@ -148,7 +148,7 @@ COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
 COPY --from=nginx /data/nginx /data/nginx
 
 # 拷贝ZASHBOARD
-COPY --from=zashboard /build/dist /www
+COPY --from=zashboard /srv/* /www
 
 # 拷贝文件
 COPY ["./docker-entrypoint.sh", "/usr/bin/"]
